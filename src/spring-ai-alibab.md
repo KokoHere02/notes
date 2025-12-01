@@ -52,6 +52,8 @@
 protected abstract StateGraph initGraph() throws GraphStateException;
 ```
 ```java
+Agent.invoke()  Agent抽象类调用代理方法
+     ↓
 compiledGraph.invoke()
      ↓
 streamFromInitialNode()     ── 创建 Flux 流 & 初始化 State
@@ -72,4 +74,9 @@ nodeExecutor.execute()      ── 子节点执行器
      ↓
 processParallelResults()    ── 并行结果合并（优先级）
         GraphFlux > Flux > 普通对象
+
+
+Agent.stream() 和上面流程一样 但是最后返回的Flux流对象
 ```
+
+Agent.buildNonStreamConfig() 构建非流配置 -> builder.addMetadata("_stream_", false) 配置stream为false
