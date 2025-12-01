@@ -78,5 +78,79 @@ processParallelResults()    ── 并行结果合并（优先级）
 
 Agent.stream() 和上面流程一样 但是最后返回的Flux流对象
 ```
-
+<!-- 
 Agent.buildNonStreamConfig() 构建非流配置 -> builder.addMetadata("_stream_", false) 配置stream为false
+Agent.buildStreamConfig() 构建流配置
+Agent.applyExecutorConfig() 将执行器应用配置到RunnableConfig构建器
+
+### Agent子类BaseAgent
+protected String inputSchema;  输入格式
+protected Type inputType;      输入类型
+
+protected String outputSchema; 输出格式
+protected Class<?> outputType; 输出类型
+
+protected String outputKey; Agent输出结果的Key
+
+protected KeyStrategy outputKeyStrategy; Key的输出策略 REPLACE 替换  APPEND 追加  MERGE 合并 支持自定义
+
+protected boolean includeContents; 是否把Agent的结果暴露给后续的Agent或者用户（是否把结果假如到上下文）
+
+protected boolean returnReasoningContents; 是否把Agent推理思考的内容也返回 -->
+
+
+#### 1. `Agent.buildNonStreamConfig()`
+构建 **非流式** 配置  
+- 调用：`builder.addMetadata("_stream_", false)`  
+- 作用：设置 `_stream_ = false`，表示关闭流式输出
+
+#### 2. `Agent.buildStreamConfig()`
+构建 **流式（Stream）** 配置  
+- 设置 `_stream_ = true`  
+- 用于逐 Token 输出结果
+
+#### 3. `Agent.applyExecutorConfig()`
+将执行器（Executor）相关配置应用到 `RunnableConfig` 构建器  
+- 包含：模型参数、温度、top-k/p、最大 token、工具调用设置等
+
+---
+
+### BaseAgent 字段说明
+
+#### 输入相关字段
+- `protected String inputSchema;`  
+  - 输入格式（JSON Schema）
+
+- `protected Type inputType;`  
+  - 输入类型（Java 类型，用于反序列化）
+
+---
+
+#### 输出相关字段
+- `protected String outputSchema;`  
+  - 输出格式（Schema）
+
+- `protected Class<?> outputType;`  
+  - 输出类型（反序列化用）
+
+- `protected String outputKey;`  
+  - Agent 输出结果在上下文中的存放 Key
+
+---
+
+#### 输出 Key 策略
+- `protected KeyStrategy outputKeyStrategy;`  
+  - 输出内容写入上下文的方式  
+  - `REPLACE`：替换原值  
+  - `APPEND`：追加内容  
+  - `MERGE`：合并（Map/JSON）  
+  - 支持自定义策略
+
+---
+
+#### 执行内容控制
+- `protected boolean includeContents;`  
+  - 是否将 Agent 结果写入上下文（暴露给后续 Agent 或用户）
+
+- `protected boolean returnReasoningContents;`  
+  - 是否返回 Agent 的推理过程（ReAct / 思考链路）
