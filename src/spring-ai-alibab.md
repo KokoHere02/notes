@@ -154,3 +154,39 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 
 - `protected boolean returnReasoningContents;`  
   - 是否返回 Agent 的推理过程（ReAct / 思考链路）
+
+#### 方法
+- `public abstract Node asNode(boolean includeContents, boolean returnReasoningContents);`
+  -  将Agent转为可编排的节点
+  -  includeContents： 是否要把执行后产生内容放到上下文
+  -  returnReasoningContents：是否要把推理链路也包含在Node中
+
+###  ReactAgent
+- `private final AgentLlmNode llmNode;`
+  - LLM使用的节点
+- `private final AgentToolNode toolNode;`
+  - 工具节点
+- `private List<? extends Hook> hooks;`
+  - 生命周期钩子用于在Agent执行的不同阶段插入额外逻辑
+     - default HookPosition[] getHookPositions() {
+		HookPositions annotation = this.getClass().getAnnotation(HookPositions.class);
+		if (annotation != null) {
+			return annotation.value();
+		}
+		// Default fallback based on hook type
+		if (this instanceof AgentHook) {
+			return new HookPosition[]{HookPosition.BEFORE_AGENT, HookPosition.AFTER_AGENT};
+		} else if (this instanceof ModelHook) {
+			return new HookPosition[]{HookPosition.BEFORE_MODEL, HookPosition.AFTER_MODEL};
+		}
+		return new HookPosition[0];
+	}
+       -  如果有HookPositions注解就使用注解里的value，如果是AgentHook那就使用BEFORE_AGENT + AFTER_AGENT，如果是ModelHook那就使用BEFORE_MODEL + AFTER_MODEL
+- `private List<ModelInterceptor> modelInterceptors;`
+  - model拦截器（多个）用于脱敏、打印日志、断点等
+- `private List<ToolInterceptor> toolInterceptors;`
+  - tool拦截器（多个）
+- `private String instruction;`
+  - Agent 固定的提示词，一般与LLM对话的话放到前面
+- `private StateSerializer stateSerializer;`
+  - 序列化文本 转为LLM可以理解的文本格式
