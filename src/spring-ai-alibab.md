@@ -190,3 +190,21 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
   - Agent 固定的提示词，一般与LLM对话的话放到前面
 - `private StateSerializer stateSerializer;`
   - 序列化文本 转为LLM可以理解的文本格式
+#### 方法
+- `protected StateGraph initGraph()`
+  - 初始化图 初始化默认默认节点 -> 注入钩子工具 -> 按位置分类钩子 -> 决定从从哪个节点开始哪个节点结束 -> 设置边构成链
+  - setupToolsForHooks() hook有些需要工具 注入tool工具
+  - findToolForHook() 寻找节点工具
+  - filterHooksByPosition() 根据HookPosition过滤钩子
+  - setupHookEdges() 设置边 构成链
+  - chainModelHookReverse() 构成反的模型链 AfterModel用
+  - chainAgentHookReverse() 构成反的钩子链
+  - chainHook() 将多个Hook串成一个链 都可有条件的跳转 构成一个hooks链
+  - setupToolRouting() 设置工具路由
+  - buildMessagesKeyStrategyFactory() 构建Key策略工厂 outputKey不为空并且策略为空的话就默认为替换策略，默认添加message为附加策略 将剩余策略全部保存
+  - makeModelToTools() 模型执行完后决定下一步的执行，如果工具还没执行完就执行tool，执行完就重新回到model，其他情况就直接结束
+  - makeToolsToModelEdge() 循环工具执行 判断工具输出来决定是直接返回还是回到模型
+  - fetchLastToolResponseMessage() 获取工具最后一条消息
+  - public class SubGraphNodeAdapter implements NodeActionWithConfig 用于执行子图
+  - getGraphResponseFlux() 创建一个新的Flux流 根据子图的结果清除父图重复的message，再将子图的结果发送给父图
+  - getSubGraphRunnableConfig() 子类获取RunnableConfig 构建一个干净的config，并与父图的checkpoint逻辑一致性
