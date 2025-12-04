@@ -242,7 +242,7 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 ### Interceptor
 
 - **有两个实现类**：ModelInterceptor（模型拦截器）和 ToolInterceptor（工具拦截器）  
-- 继承关系图：![Interrceptor ](./image/Interrceptor.png)
+- 继承关系图：![Interrceptor ](./image/InterrceptorRelation.png)
 
 #### ModelInterceptor
 
@@ -286,3 +286,35 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 
 - 将多个拦截器按顺序组合成链  
 - 实现责任链模式
+
+### Hook
+
+- **Hook 有两个实现类**：AgentHook 和 ModelHook
+- ![Hook 继承关系图](./image/HookRelation.png)
+
+#### AgentHook
+- 用于抽象 AgentHook，在 Agent 执行流程不同阶段插入不同的逻辑，易于给 Agent 的执行增加扩展
+- **示例**：
+  - `ShellToolAgentHook`  
+    - 专门管理 ShellTool 会话的钩子  
+    - 在 Agent 开始执行前创建 Shell，会话期间可以使用 shell 命令  
+    - 在 Agent 执行完成后关闭或释放会话  
+    - 实现了 `ToolInjection` 工具注入接口
+
+#### ModelHook
+- 用于抽象 ModelHook，在 Model 执行流程不同阶段插入不同的逻辑
+- **示例**：
+  - `HumanInTheLoopHook`  
+    - 可以人工介入的钩子，等待人工输入确认或审核，增加安全性
+  - `ModelCallLimitHook`  
+    - 用于追踪和限制模型调用次数的钩子  
+    - 该钩子监控 Agent 执行期间的模型调用次数，在达到指定限制时终止 Agent
+  - `PIIDetectionHook`  
+    - 用于检测输入中的 PII，例如：邮箱（Email）、信用卡号（Credit Card）、IP 地址、MAC 地址、URL  
+    - 可选脱敏策略
+  - `SummarizationHook`  
+    - 监控消息的 token 数  
+    - 用于在 token 快达到限制时总结历史旧对话，保证近期消息保留上下文连续性
+  - `ToolCallLimitHook`  
+    - 用于追踪并限制工具调用次数的钩子  
+    - 在达到指定次数时终止 Agent
