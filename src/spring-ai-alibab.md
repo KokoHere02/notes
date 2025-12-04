@@ -168,7 +168,7 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
   - 工具节点
 - `private List<? extends Hook> hooks;`
   - 生命周期钩子用于在Agent执行的不同阶段插入额外逻辑
-     - default HookPosition[] getHookPositions() {
+      ```java default HookPosition[] getHookPositions() {
 		HookPositions annotation = this.getClass().getAnnotation(HookPositions.class);
 		if (annotation != null) {
 			return annotation.value();
@@ -180,8 +180,8 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 			return new HookPosition[]{HookPosition.BEFORE_MODEL, HookPosition.AFTER_MODEL};
 		}
 		return new HookPosition[0];
-	}
-       -  如果有HookPositions注解就使用注解里的value，如果是AgentHook那就使用BEFORE_AGENT + AFTER_AGENT，如果是ModelHook那就使用BEFORE_MODEL + AFTER_MODEL
+	} ```
+  -  如果有HookPositions注解就使用注解里的value，如果是AgentHook那就使用BEFORE_AGENT + AFTER_AGENT，如果是ModelHook那就使用BEFORE_MODEL + AFTER_MODEL
 - `private List<ModelInterceptor> modelInterceptors;`
   - model拦截器（多个）用于脱敏、打印日志、断点等
 - `private List<ToolInterceptor> toolInterceptors;`
@@ -191,20 +191,98 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 - `private StateSerializer stateSerializer;`
   - 序列化文本 转为LLM可以理解的文本格式
 #### 方法
+
 - `protected StateGraph initGraph()`
-  - 初始化图 初始化默认默认节点 -> 注入钩子工具 -> 按位置分类钩子 -> 决定从从哪个节点开始哪个节点结束 -> 设置边构成链
-  - setupToolsForHooks() hook有些需要工具 注入tool工具
-  - findToolForHook() 寻找节点工具
-  - filterHooksByPosition() 根据HookPosition过滤钩子
-  - setupHookEdges() 设置边 构成链
-  - chainModelHookReverse() 构成反的模型链 AfterModel用
-  - chainAgentHookReverse() 构成反的钩子链
-  - chainHook() 将多个Hook串成一个链 都可有条件的跳转 构成一个hooks链
-  - setupToolRouting() 设置工具路由
-  - buildMessagesKeyStrategyFactory() 构建Key策略工厂 outputKey不为空并且策略为空的话就默认为替换策略，默认添加message为附加策略 将剩余策略全部保存
-  - makeModelToTools() 模型执行完后决定下一步的执行，如果工具还没执行完就执行tool，执行完就重新回到model，其他情况就直接结束
-  - makeToolsToModelEdge() 循环工具执行 判断工具输出来决定是直接返回还是回到模型
-  - fetchLastToolResponseMessage() 获取工具最后一条消息
-  - public class SubGraphNodeAdapter implements NodeActionWithConfig 用于执行子图
-  - getGraphResponseFlux() 创建一个新的Flux流 根据子图的结果清除父图重复的message，再将子图的结果发送给父图
-  - getSubGraphRunnableConfig() 子类获取RunnableConfig 构建一个干净的config，并与父图的checkpoint逻辑一致性
+  - 初始化图
+    - 初始化默认节点
+    - 注入钩子工具
+    - 按位置分类钩子
+    - 决定从哪个节点开始、哪个节点结束
+    - 设置边构成链
+  - `setupToolsForHooks()`  
+    - hook 有些需要工具，注入 tool 工具
+  - `findToolForHook()`  
+    - 寻找节点工具
+  - `filterHooksByPosition()`  
+    - 根据 HookPosition 过滤钩子
+  - `setupHookEdges()`  
+    - 设置边构成链
+  - `chainModelHookReverse()`  
+    - 构成反的模型链（AfterModel 用）
+  - `chainAgentHookReverse()`  
+    - 构成反的钩子链
+  - `chainHook()`  
+    - 将多个 Hook 串成一个链，可以有条件跳转，构成 hooks 链
+  - `setupToolRouting()`  
+    - 设置工具路由
+  - `buildMessagesKeyStrategyFactory()`  
+    - 构建 Key 策略工厂
+    - outputKey 不为空并且策略为空时，默认为替换策略
+    - 默认添加 message 为附加策略，将剩余策略全部保存
+  - `makeModelToTools()`  
+    - 模型执行完后决定下一步执行
+    - 如果工具没执行完就执行 tool，执行完就重新回到 model
+    - 其他情况直接结束
+  - `makeToolsToModelEdge()`  
+    - 循环工具执行
+    - 判断工具输出决定是直接返回还是回到模型
+  - `fetchLastToolResponseMessage()`  
+    - 获取工具最后一条消息
+  - `public class SubGraphNodeAdapter implements NodeActionWithConfig`  
+    - 用于执行子图
+  - `getGraphResponseFlux()`  
+    - 创建新的 Flux 流
+    - 根据子图结果清除父图重复的 message，再将子图结果发送给父图
+  - `getSubGraphRunnableConfig()`  
+    - 子类获取 RunnableConfig
+    - 构建干净的 config，并与父图的 checkpoint 逻辑保持一致性
+
+---
+
+### Interceptor
+
+- **有两个实现类**：ModelInterceptor（模型拦截器）和 ToolInterceptor（工具拦截器）  
+- 继承关系图：![Interrceptor ](./image/Interrceptor.png)
+
+#### ModelInterceptor
+
+- `ContextEditingInterceptor`  
+  - 用于控制上下文 token 数  
+  - 太大时清理旧工具结果，避免 prompt 超出模型 token 限制
+- `FilesystemInterceptor`  
+  - 为 Agent 注入文件系统操纵能力  
+  - 功能：ls、read_file、write_file、edit_file、glob、grep
+- `ModelFallbackInterceptor`  
+  - 模型调用错误时调用其他模型，增强高可用
+- `PatchToolCallsInterceptor`  
+  - 自动修复消息历史中未完成的工具调用  
+  - 确保每个 ToolCallMessage 都有对应的 ToolResponseMessage
+- `SubAgentInterceptor`  
+  - 子 Agent 调用拦截器  
+  - 每个复杂子 Agent 调用后，将干净简洁的结果返回给父 Agent
+- `TodoListInterceptor`  
+  - 为 Agent 注入“待办事项管理能力”  
+  - 帮助智能体将复杂多步骤任务拆解，并向用户展示进度
+- `ToolSelectionInterceptor`  
+  - 为 LLM 选择相关工具，再调用主模型  
+  - 筛选最相关工具，减少 token 使用，帮助主模型专注于合适工具
+
+#### ToolInterceptor
+
+- `LargeResultEvictionInterceptor`  
+  - 自动将大型工具结果写出到文件系统  
+  - 当工具调用响应超过配置的 token 限制时，保存完整结果到文件，并返回截断消息  
+  - DEFAULT_TOOL_TOKEN_LIMIT = 20000
+- `ToolEmulatorInterceptor`  
+  - 工具模拟调用  
+  - Agent 调用工具时，不实际执行真实工具，而是用 LLM 生成模拟结果
+- `ToolErrorInterceptor`  
+  - 工具错误拦截器
+- `ToolRetryInterceptor`  
+  - 重试拦截器  
+  - 工具调用失败时会自动按重试策略再次尝试
+
+#### InterceptorChain.java
+
+- 将多个拦截器按顺序组合成链  
+- 实现责任链模式
