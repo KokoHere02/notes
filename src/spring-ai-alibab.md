@@ -318,3 +318,30 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
   - `ToolCallLimitHook`  
     - 用于追踪并限制工具调用次数的钩子  
     - 在达到指定次数时终止 Agent
+### LlmRoutingAgent FlowAgent的子类
+- 作用：基于LLM路由智能体，根据输入内容自动选择调用哪个Agent或Tool，是智能决策Agent
+### LoopAgent FlowAgent的子类
+- 是一个支持多种循环的Agent 例：支持固定数量循环，基于条件循环，可以根据LoopStrategy来进行自定义实现循环策略
+### ParallelAgent FlowAgent的子类
+- 执行多个子Agent合并它们的结果，实现了并行扇出采集模式，输入同时分配给所有子Agent，并行执行
+### SequentialAgent FlowAgent的子类
+- 顺序代理，将多个子Agent按顺序串联执行
+### LoopStrategy
+#### ArrayLoopStrategy 
+- 循环策略，把当前消息里的JSON数组取出来逐个调用Agent并汇总结果
+#### ConditionLoopStrategy 
+- 条件循环策略，根据条件循环调用Agent，重试直到条件满足或到达最大次数
+#### CountLoopStrategy
+- 固定次策略
+
+#### ConditionEvaluator
+- 是Flow中用于判断条件并写入状态的节点动作，根据当前State计算一个值，让Routing节点知道接下来应该走哪条路径
+#### ConditionEvaluatorAction
+- 用于用于评估条件以确定路由路径，读取状态结果并返回相应的路由
+
+#### EnhancedParallelResultAggregator
+- ParallelAgent的高级结果聚合器，用于在多个并行执行分支全部完成后，对结果进行统一合并
+#### ParallelResultAggregator
+- 基础版的结果聚合器
+#### RoutingEdgeAction
+- 根据条件选择下一条要走的路径，RoutingAgent/FlowAgent中实现条件跳转的关键组件。根据前一个Node执行的结果选择下一个Node
