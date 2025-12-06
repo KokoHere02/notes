@@ -345,3 +345,21 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 - 基础版的结果聚合器
 #### RoutingEdgeAction
 - 根据条件选择下一条要走的路径，RoutingAgent/FlowAgent中实现条件跳转的关键组件。根据前一个Node执行的结果选择下一个Node
+
+### FlowGraphBuildingStrategy interface 构建不同StateGraphs策略
+- `buildGraph`: 根据FlowGraphConfig构建
+- `getStrategyType`获取该不同类型的标识符
+- `default validateConfig ` 校验FlowGraphConfig
+- `default KeyStrategyFactory generateKeyStrategyFactory` 合并Agent Key的策略
+#### ConditionalGraphBuildingStrategy
+- 构建条件分支的执行图，根据状态选择不同的下一步Agent
+#### FlowGraphBuildingStrategyRegistry
+- 是一个注册中心，用来存储和查找不同类型的FlowGraph构建策略，让用户可以动态的构建策略
+#### LoopGraphBuildingStrategy
+-  为LoopAgent构建一个循环执行图，通过初始化节点 + 条件判断 + 循环节点。实现可控、可回溯、可扩展的循环流程
+#### ParallelGraphBuildingStrategy
+- 构建并行策略，在并行策略中，所有子Agent同时执行，通过指定合并策略汇总其结果
+#### RoutingGraphBuildingStrategy
+- 构建LLM的路由策略，LLM根据输入和Agent的能力决定由哪个Agent处理该任务
+#### SequentialGraphBuildingStrategy 
+- 构建顺序执行策略，在顺序策略中，每个Agent的输出成为下一个Agent的输入
