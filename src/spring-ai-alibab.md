@@ -363,3 +363,19 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 - 构建LLM的路由策略，LLM根据输入和Agent的能力决定由哪个Agent处理该任务
 #### SequentialGraphBuildingStrategy 
 - 构建顺序执行策略，在顺序策略中，每个Agent的输出成为下一个Agent的输入
+
+### spring-ai-alibaba-graph-core
+#### CompileConfig 用于编译和Active配置。
+- `private SaverConfig saverConfig = new SaverConfig().register(new MemorySaver());`： 保存策略，默认MemorySaver
+- `private boolean releaseThread = false;` 能否让线程释放
+- `private Store store;` Agent的长期记忆存储，持久跨会话内存管理
+- `private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;` 观测策略
+- `private Deque<GraphLifecycleListener> lifecycleListeners = new LinkedBlockingDeque<>(25);` 生命周期监听器
+#### abstract class DiagramGenerator 用于更具Grape生成图
+- `MermaidGenerator extends DiagramGenerator` 输出的是Mermaid语法的图，可以直接放到 Markdown 中渲染
+- `PlantUMLGenerator extends DiagramGenerator` 生成的是时序图、UML活动图
+#### record GraphRepresentation 用代码格式的图形表示，记录了图的数据类型
+
+#### class GraphRunner 运行Grape的外壳
+#### class GraphRunnerContext 上下文Grape用与在执行过程中的状态管理
+#### class NodeOutput 节点输出
