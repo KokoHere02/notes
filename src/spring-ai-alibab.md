@@ -363,24 +363,52 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 - 构建LLM的路由策略，LLM根据输入和Agent的能力决定由哪个Agent处理该任务
 #### SequentialGraphBuildingStrategy 
 - 构建顺序执行策略，在顺序策略中，每个Agent的输出成为下一个Agent的输入
+# spring-ai-alibaba-graph-core
 
-### spring-ai-alibaba-graph-core
-#### CompileConfig 用于编译和Active配置。
-- `private SaverConfig saverConfig = new SaverConfig().register(new MemorySaver());`： 保存策略，默认MemorySaver
-- `private boolean releaseThread = false;` 能否让线程释放
-- `private Store store;` Agent的长期记忆存储，持久跨会话内存管理
-- `private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;` 观测策略
-- `private Deque<GraphLifecycleListener> lifecycleListeners = new LinkedBlockingDeque<>(25);` 生命周期监听器
-#### abstract class DiagramGenerator 用于更具Grape生成图
-- `MermaidGenerator extends DiagramGenerator` 输出的是Mermaid语法的图，可以直接放到 Markdown 中渲染
-- `PlantUMLGenerator extends DiagramGenerator` 生成的是时序图、UML活动图
-#### record GraphRepresentation 用代码格式的图形表示，记录了图的数据类型
+## CompileConfig
+用于编译和 Active 配置。
 
-#### class GraphRunner 运行Grape的外壳
-#### class GraphRunnerContext 上下文Grape用与在执行过程中的状态管理
-#### class NodeOutput 节点输出
+- `private SaverConfig saverConfig = new SaverConfig().register(new MemorySaver());`  
+  保存策略，默认使用 `MemorySaver`。
+- `private boolean releaseThread = false;`  
+  是否允许线程释放。
+- `private Store store;`  
+  Agent 的长期记忆存储，用于持久化跨会话的内存管理。
+- `private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;`  
+  观测策略。
+- `private Deque<GraphLifecycleListener> lifecycleListeners = new LinkedBlockingDeque<>(25);`  
+  生命周期监听器队列。
 
-### Store 存储会话上下文 支持
-#### StoreItem 用于存储搜索后的结构，支持多级命名空间
-#### StoreSearchRequestStoreItem 用于搜索，可以根据命名空间，文本进行搜索，和条件过来
-#### StoreSearchResult 用于封装存储搜索的结果，能存储多个List<StoreItem>
+## DiagramGenerator (abstract class)
+用于根据 Grape 生成图。
+
+- `MermaidGenerator extends DiagramGenerator`  
+  输出 Mermaid 语法的图，可直接放到 Markdown 中渲染。
+- `PlantUMLGenerator extends DiagramGenerator`  
+  生成时序图、UML 活动图等。
+
+## GraphRepresentation (record)
+用于以代码格式表示图形，记录图的数据类型。
+
+## GraphRunner
+运行 Grape 的外壳类。
+
+## GraphRunnerContext
+上下文管理类，用于在执行过程中的状态管理。
+
+## NodeOutput
+节点输出类。
+
+---
+
+## Store
+用于存储会话上下文，支持多级命名空间。
+
+### StoreItem
+用于存储搜索后的结构，支持多级命名空间。
+
+### StoreSearchRequestStoreItem
+用于搜索，可根据命名空间、文本和条件进行查询。
+
+### StoreSearchResult
+封装存储搜索结果，能存储多个 `List<StoreItem>`。
