@@ -379,3 +379,8 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 #### class GraphRunner 运行Grape的外壳
 #### class GraphRunnerContext 上下文Grape用与在执行过程中的状态管理
 #### class NodeOutput 节点输出
+
+### Store 存储会话上下文 支持
+#### StoreItem 用于存储搜索后的结构，支持多级命名空间
+#### StoreSearchRequestStoreItem 用于搜索，可以根据命名空间，文本进行搜索，和条件过来
+#### StoreSearchResult 用于封装存储搜索的结果，能存储多个List<StoreItem>
