@@ -411,4 +411,79 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 用于搜索，可根据命名空间、文本和条件进行查询。
 
 ### StoreSearchResult
-封装存储搜索结果，能存储多个 `List<StoreItem>`。
+封装存储搜索结果，能存储多个 `StoreItem`。
+
+## interface Serializer<T>
+- `byte[] objectToBytes(T object)` T转Bytes[] 
+- `T bytesToObject(byte[] bytes)` Bytes[]转T
+
+### interface NullableObjectSerializer<T> extends Serializer<T>
+- 可以为空的序列化接口增加了非空判断，继承了Serializer
+### AgentInstructionMessage
+- 用于传达消息给Agent
+
+### class AssistantMessageSerializer implements NullableObjectSerializer<AssistantMessage>
+- 用于转换成模型底层要求格式
+
+### DeepSeekAssistantMessageSerializer implements NullableObjectSerializer
+- 用于转换数据成DeepSeek要求的格式
+
+### public class ObjectInputWithMapper implements ObjectInput 
+- 反序列化，将任意数据转成Object
+
+### class ObjectOutputWithMapper implements ObjectOutput
+- 将Object对象序列化写出去
+
+### class ObjectStreamStateSerializer extends StateSerializer
+- 流式状态序列化器
+  
+### class SerializerMapper
+- 管理序列化对象
+
+### SpringAIStateSerializer extends ObjectStreamStateSerializer
+- 负责对执行程序的Agent进行序列化和反序列化
+
+### SystemMessageSerializer implements Serializer<SystemMessage>
+- 系统消息序列化器
+
+### ToolCallSerializer implements NullableObjectSerializer
+- 工具回调序列化器
+  
+### ToolResponseMessageSerializer implements Serializer
+- 工具响应序列化器
+  
+### class UserMessageSerializer
+- 用户信息序列化器
+  
+### abstract class PlainTextStateSerializer extends StateSerializer
+- 存文本序列化
+
+### interface AgentInstructionMessageHandler
+- Agent指令消息处理器接口
+
+### interface AssistantMessageHandler
+- 协助消息处理器接口
+
+### interface DeepSeekAssistantMessageHandler
+- DeepSeek协助消息处理器接口
+
+### GenericListDeserializer extends StdDeserializer
+- 通用List反序列化
+
+### GenericMapDeserializer extends StdDeserializer<Map<String, Object>>
+- 通用Map反序列化
+  
+### interface JacksonDeserializer （@FunctionalInterface）
+- 函数式接口 用于在Jackson里自定义反序列化逻辑
+
+### class JacksonNodeOutputDeserializer
+- Jackson版本NodeOutput反序列化
+
+### class JacksonNodeOutputSerializer
+- Jackson版本NodeOutput序列化
+
+### abstract class JacksonStateSerializer
+- 使用jackson库 的实现 
+
+### SpringAIJacksonStateSerializer
+- SpirngAi Jackson的State序列化
