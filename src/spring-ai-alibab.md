@@ -487,3 +487,27 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 
 ### SpringAIJacksonStateSerializer
 - SpirngAi Jackson的State序列化
+
+### DefaultScheduledAgentManager 
+- 定时任务调度Agent
+
+### interface ScheduledAgentManager
+- 用于管理所有Agent任务的定时任务的接口
+- `registerTask` 注册task 返回ScheduledAgentTask
+- `unregisterTask` 取消Agent的定时任务
+- `getTask(String taskId);` 根据TaksId获取定时任务
+- `getAllActiveTaskIds` 获取所有定时任务
+- `getActiveTaskCount` 统计当前Agent任务数量
+- `getTaskScheduler` 获取该管理器的Task
+- `isShutdown` 检查Agent是否关闭
+- `shutdown` 关闭Manager以及所有任务
+
+### interface ScheduleLifecycleListener
+- ` void onEvent(ScheduleEvent event, Object data)` 用于执行任务时执行的生命钩子
+  -  `STARTED` 开始时执行
+  -  `STOPPED` 停止时执行
+  -  `EXECUTION_STARTED` 执行开始
+  -  `EXECUTION_COMPLETED` 执行完后
+  -  `EXECUTION_FAILED` 任务调度失败
+### ScheduledAgentManagerFactory
+- 用于创建管理定时任务控制器的工厂
