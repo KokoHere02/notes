@@ -544,3 +544,27 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 
 ### GraphEdgeObservationHandler
 - 用于监测边的生命周期事件
+  
+### record Edge(String sourceId, List<EdgeValue> targets)
+- 表示图中的边,需要一个源Id和边的值
+
+### record EdgeCondition(AsyncCommandAction action, Map<String, String> mappings)
+- 图中边条件的描述模型，用于决定图在执行时是否应该沿某条边继续执行
+
+### record EdgeValue(String id, EdgeCondition value)
+- 边的值，和边值的相关条件
+
+### class Node
+- 图中的一个节点，具有唯一标识符用于创建节点执行的工厂
+
+### class ParallelNode extends Node
+- 并行节点，可以并行处理多个Agent任务
+
+### class SubCompiledGraphNode
+- 子图编译后的节点
+
+### SubCompiledGraphNodeAction
+- 在节点中执行子图的异步动作，用于在节点中嵌套执行子图
+
+### SubStateGraphNode
+- 子节点的状态
