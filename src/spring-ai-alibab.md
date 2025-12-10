@@ -511,3 +511,36 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
   -  `EXECUTION_FAILED` 任务调度失败
 ### ScheduledAgentManagerFactory
 - 用于创建管理定时任务控制器的工厂
+
+### GraphMetricsGenerator
+- 统一为图执行过程生成可观测性指标，包括节点、边和整体执行的监控统计
+
+### GraphObservationLifecycleListener
+- 用于监听Graph执行生命周期事件，并基于这些事件生成完整的Observations（观测数据） 生命周期监听器
+
+### DefaultGraphNodeObservationConvention GraphNodeObservationConvention的默认实现
+- 为图节点提供标准的监测
+
+### GraphNodeObservationContext
+- 用于监测图节点的上下文，提供节点特定的观测数据，整合了Micrometer 的监测框架。
+
+### GraphNodeObservationHandler
+- 这是一个ObservationHandler，用于在Graph Node执行的各个阶段处理Observation，并将Node的执行信息写入日志
+
+### DefaultGraphObservationConvention
+- 默认的图监测类
+
+### GraphObservationContext 
+- 用于监测图的上下文
+
+### GraphObservationHandler
+- 用于监测图生命周期事件的处理
+
+### DefaultGraphEdgeObservationConvention 
+- 默认的边监测实现
+
+### GraphEdgeObservationContext
+- 用于监测边的上下文
+
+### GraphEdgeObservationHandler
+- 用于监测边的生命周期事件
