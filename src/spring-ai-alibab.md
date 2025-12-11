@@ -568,3 +568,12 @@ protected boolean returnReasoningContents; 是否把Agent推理思考的内容�
 
 ### SubStateGraphNode
 - 子节点的状态
+
+### abstract class BaseGraphExecutor
+- 图执行器的基类，该类为所有执行处理程序提供一个共同的基类
+
+### class MainGraphExecutor extends BaseGraphExecutor
+- 主图执行器，负责处理主执行流程
+
+### class NodeExecutor extends BaseGraphExecutor
+- 节点执行器，负责节点执行和结果处理
