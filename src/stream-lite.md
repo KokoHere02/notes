@@ -1,5 +1,12 @@
 # stream-lite 项目
 
+## 技术栈
+- jdk17
+- spring boot3
+- mybatis-flex
+- PostgreSQL
+
+## 数据库表
 `users`（用户表）
 `rooms`（直播间表）
 `streams`（推流记录）
