@@ -19,21 +19,31 @@
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    avatar_url TEXT,
+    password VARCHAR(255) NOT NULL,            -- bcrypt 或其他算法加密后的密码
+    password_salt VARCHAR(32),                -- 可选，记录盐值
+    email VARCHAR(100) UNIQUE,                -- 可选邮箱登录
+    phone VARCHAR(20) UNIQUE,                 -- 可选手机号登录
+    avatar_url VARCHAR(255),                   -- 存储头像URL或ID
     bio TEXT,
+    status SMALLINT NOT NULL DEFAULT 1,       -- 1=正常, 0=禁用, 2=封禁
+    last_login TIMESTAMP,                     -- 最近登录时间
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-COMMENT ON TABLE users IS '用户表';
-COMMENT ON COLUMN users.username IS '用户名';
-COMMENT ON COLUMN users.password IS '密码（加密后）';
-COMMENT ON COLUMN users.avatar_url IS '头像 URL';
-COMMENT ON COLUMN users.bio IS '个人简介';
-COMMENT ON COLUMN users.created_at IS '创建时间';
-COMMENT ON COLUMN users.updated_at IS '更新时间';
+-- 自动更新时间 trigger（PostgreSQL）
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+   NEW.updated_at = NOW();
+   RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
+CREATE TRIGGER trg_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
 
 -- ========== live_rooms ==========
 CREATE TABLE live_rooms (
