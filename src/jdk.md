@@ -46,3 +46,15 @@
 - `boolean containsAll(Collection<?> c);` 如果该集合包含给定集合中的所有元素则返回true
 - `boolean addAll(Collection<? extends E> c);` 将指定的集合添加到该集合中，如果修改这个指定的集合则该操作是为定义的
 - `boolean removeAll(Collection<?> c);` 移除该集合中所有包含在指定集合中的元素
+- `default boolean removeIf(Predicate<? super E> filter);` 删除满足条件的元素
+- `boolean retainAll(Collection<?> c);` 移除所有不包含指定集合的元素
+- `void clear();` 移除所有该集合的元素
+- `default Spliterator<E> spliterator()` 是StreamAPI的底层入口，默认基于Iterator创建一个延迟绑定、fail-fast、可估算大小的Spliterator；性能一般
+
+### abstract class AbstractCollection<E> implements Collection<E> Collection的实现
+- 这是集合接口的骨架，以最小实现该接口所需的功能，要实现不可修改的集合，只需要扩展该类并提供迭代器和size方法的实现。迭代器返回的迭代器必须实现hasNext和next，要实现可修改集合，必须覆盖add方法
+- `public boolean contains(Object o)` 提供了一个简易判断是否包含的方法，支持null
+-  `public Object[] toArray()` 创建一个Object[size()]的数组，从迭代器里获取顺序数据依次放入数组中，迭代器可能和size()大小不同步，最后就需要检查迭代器里是否还要多余的元素finishToArray()处理多预期的元素
+-  `public boolean add(E e)` 不支持add的方法需要具体的子类去实现
+
+### interface SequencedCollection<E> extends Collection<E>
