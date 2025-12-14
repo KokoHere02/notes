@@ -153,9 +153,87 @@ COMMENT ON COLUMN room_records.max_online IS '最高同时在线人数';
 COMMENT ON COLUMN room_records.created_at IS '创建时间';
 
 
+```
+
+## 引入JWT
+```xml 
+  <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
+  <dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>${jjwt.version}</version>
+  </dependency>
+  <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl -->
+  <dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>${jjwt.version}</version>
+    <scope>runtime</scope>
+  </dependency>
+  <dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>${jjwt.version}</version>
+  </dependency>
+```
+### JWTUtil
+```java 
+
+public class JwtUtil {
+  private JwtUtil() {
+  }
+
+  private static final String JWT_KEY = SpringUtil.getProperty("crypto.jwt-key","");
+  private static final long EXPIRATION = 3600_000; // 1小时
+
+  public static String generateToken(@NonNull String id) {
+    return Jwts.builder()
+      .subject(id)
+      .issuedAt(new Date())
+      .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
+      .signWith(getSigningKey())
+      .compact();
+  }
+
+
+  private static SecretKey getSigningKey() {
+    byte[] keyBytes = Decoders.BASE64.decode(JWT_KEY);
+    return Keys.hmacShaKeyFor(keyBytes);
+  }
+
+}
+```
+## Login 
+```java 
+
+  @Override
+  public String login(@NonNull UserDto user) {
+    String username = user.getUsername();
+    String password = user.getPassword();
+    if (!validUsername(username) || !validPassword(password)) {
+      // todo 抛出错误 非法参数
+      return null;
+    }
+    String decryptPassword = CryptoUtil.rsaDecrypt(password);
+    Users dbUser = this.queryChain()
+      .eq(Users::getUsername, username)
+      .one();
+    if  (dbUser == null) {
+      // todo 抛出错误 用户不存在
+      return null;
+    }
+    String decrypt = CryptoUtil.aesDecrypt(dbUser.getPassword());
+    if (decrypt.isBlank() || !decrypt.equals(decryptPassword)) {
+      // todo 抛出错误 密码错误
+      return null;
+    }
+
+    return JwtUtil.generateToken(dbUser.getId().toString());
+  }
 
 ```
 
+# stream-lite-web
 
 ## 技术栈（前端）
 - vue3
@@ -165,3 +243,84 @@ COMMENT ON COLUMN room_records.created_at IS '创建时间';
 - tailwin3
 - DaisyUI + Headless UI
 
+
+## 头部组件（暂定）
+
+```html
+<div class="navbar bg-base-100 shadow-sm px-4">
+  <!-- 左侧 -->
+  <div class="navbar-start">
+    <a
+      class="btn btn-ghost text-xl
+             text-base-content
+             hover:bg-primary/15
+             hover:text-base-content"
+    >
+      daisyUI
+    </a>
+  </div>
+
+  <!-- 中间搜索 -->
+  <div class="navbar-center">
+    <label class="input input-bordered flex items-center gap-2 w-80">
+      <svg
+        class="h-[1em] opacity-50"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <g
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          stroke-width="2.5"
+          fill="none"
+          stroke="currentColor"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </g>
+      </svg>
+
+      <input
+        v-model="query"
+        @keydown.enter="submitSearch"
+        type="search"
+        class="grow"
+        placeholder="Search"
+      />
+
+      <kbd class="kbd kbd-sm">⌘</kbd>
+      <kbd class="kbd kbd-sm">K</kbd>
+    </label>
+  </div>
+```
+## 卡片组件
+```html
+  <!-- 右侧操作区 -->
+  <div class="main">
+  <div class="card bg-base-100 w-96 shadow-sm">
+    <figure>
+      <img
+        src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+        alt="Shoes"
+      />
+    </figure>
+
+    <div class="card-body gap-2 px-3 py-3">
+      <p>4点世纪大战 HLE vs T1</p>
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <img
+            class="w-8 h-8 rounded-full"
+            src="https://img.daisyui.com/images/profile/demo/yellingcat@192.webp"
+          />
+          <span class="ml-2 text-sm font-medium">Card Title</span>
+        </div>
+
+        <span class="text-xs text-gray-500">200 人</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+```
