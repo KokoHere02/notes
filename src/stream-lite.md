@@ -1,6 +1,6 @@
 # stream-lite 项目
 
-## 技术栈
+## 技术栈 (后端)
 - jdk17
 - spring boot3
 - mybatis-flex
@@ -155,3 +155,13 @@ COMMENT ON COLUMN room_records.created_at IS '创建时间';
 
 
 ```
+
+
+## 技术栈（前端）
+- vue3
+- vite
+- route
+- pinia
+- tailwin3
+- DaisyUI + Headless UI
+
