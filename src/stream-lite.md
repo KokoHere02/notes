@@ -210,10 +210,7 @@ public class JwtUtil {
   public String login(@NonNull UserDto user) {
     String username = user.getUsername();
     String password = user.getPassword();
-    if (!validUsername(username) || !validPassword(password)) {
-      // todo 抛出错误 非法参数
-      return null;
-    }
+
     String decryptPassword = CryptoUtil.rsaDecrypt(password);
     Users dbUser = this.queryChain()
       .eq(Users::getUsername, username)
@@ -231,6 +228,37 @@ public class JwtUtil {
     return JwtUtil.generateToken(dbUser.getId().toString());
   }
 
+``` 
+
+## CryptoUtil
+
+### rsaDecrypt
+``` java 
+
+public static String rsaDecrypt(String encrypted) {
+    try {
+      byte[] keyBytes = Base64.getDecoder().decode(RSA_KEY);
+      PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+      PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+
+      // 指定 OAEP 参数
+      OAEPParameterSpec oaepParams = new OAEPParameterSpec(
+        "SHA-256",                  // OAEP Hash
+        "MGF1",                      // MGF1
+        MGF1ParameterSpec.SHA256,    // MGF1 Hash
+        PSource.PSpecified.DEFAULT
+      );
+
+      Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+      cipher.init(Cipher.DECRYPT_MODE, privateKey, oaepParams);
+
+      byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(encrypted));
+      return new String(decrypted, StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      throw new RuntimeException("RSA 解密失败", e);
+    }
+  }
 ```
 
 # stream-lite-web
@@ -243,6 +271,24 @@ public class JwtUtil {
 - tailwin3
 - DaisyUI + Headless UI
 
+- src
+  - api
+    - auth.ts
+    - index.ts
+  - asserts
+  - components
+  - config
+  - layouts
+  - router
+  - stores
+  - types
+  - util
+  - views
+    - Auth
+    - Home
+  - App.vue
+  - main.ts
+  - index.css
 
 ## 头部组件（暂定）
 
@@ -323,4 +369,81 @@ public class JwtUtil {
   </div>
 </div>
 
+```
+
+```ts 
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
+  ],
+  darkMode: ['class', '.dark'],
+  theme: {
+    extend: {
+      colors: {
+        primary: { DEFAULT: '#0073e6', dark: '#1e40af' },
+        secondary: { DEFAULT: '#8b5cf6', dark: '#6b21a8' },
+        success: '#16a34a',
+        error: '#dc2626',
+        warning: '#f59e0b',
+        info: '#0ea5e9',
+        bg: { light: '#f9fafb', dark: '#111827' },
+        text: { light: '#1f2937', dark: '#f3f4f6' },
+      },
+    },
+  },
+  plugins: [require('daisyui')],
+  corePlugins: { preflight: false }, // true就会覆盖 daisyui 的样式 BUG
+  daisyui: {
+    themes: true, // ✅ 启用官方主题
+  }
+}
+
+```
+## CryptoUtil
+```ts 
+import { RSA_PUBLIC_KEY } from '@/config/rsa'
+
+// 加密函数
+export async function encryptRSA(plainText: string): Promise<string> {
+  const publicKey = await importPublicKey(RSA_PUBLIC_KEY);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(plainText);
+  const encrypted = await crypto.subtle.encrypt(
+    {
+      name: "RSA-OAEP",
+    },
+    publicKey,
+    data
+  );
+  // 转 Base64 输出
+  return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+}
+
+
+// 导入公钥
+async function importPublicKey(base64Key: string): Promise<CryptoKey> {
+  const keyBuffer = base64ToArrayBuffer(base64Key);
+  return await crypto.subtle.importKey(
+    "spki", // 公钥使用 SPKI
+    keyBuffer,
+    {
+      name: "RSA-OAEP",
+      hash: { name: "SHA-256" }, // OAEP 使用 SHA-256
+    },
+    false,
+    ["encrypt"]
+  );
+}
+
+// 转换为 ArrayBuffer
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
 ```
