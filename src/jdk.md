@@ -62,3 +62,8 @@
 - `SequencedCollection<E> reversed();` 反转视图
 - `default void addFirst(E e)` 新增元素到头部 
 - `default void addLast(E e)` 新增元素到尾部
+
+#### interface List<E> extends SequencedCollection<E>
+- `boolean isEmpty();` 列表没有元素返回true
+- `boolean addAll(int index, Collection<? extends E> c);` 在指定索引添加Collection
+- `boolean retainAll(Collection<?> c);` 将指定列表不包含的全部移除
