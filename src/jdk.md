@@ -58,3 +58,7 @@
 -  `public boolean add(E e)` 不支持add的方法需要具体的子类去实现
 
 ### interface SequencedCollection<E> extends Collection<E>
+- 有确定的顺序，支持两端操作，支持反向视图 JAVA21新增
+- `SequencedCollection<E> reversed();` 反转视图
+- `default void addFirst(E e)` 新增元素到头部 
+- `default void addLast(E e)` 新增元素到尾部
