@@ -67,3 +67,7 @@
 - `boolean isEmpty();` 列表没有元素返回true
 - `boolean addAll(int index, Collection<? extends E> c);` 在指定索引添加Collection
 - `boolean retainAll(Collection<?> c);` 将指定列表不包含的全部移除
+#####  class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+- ArrayList 是一个基于可变长度数组的List实现，支持随机访问，运行null，非线程安全
+- `private static final int DEFAULT_CAPACITY = 10;` 默认容量10
+- `private static final Object[] EMPTY_ELEMENTDATA = {};`  是一个共享的 0 长度数组，用来避免为真正“容量为 0”的 ArrayList 分配多余对象
