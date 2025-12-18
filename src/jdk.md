@@ -71,3 +71,9 @@
 - ArrayList 是一个基于可变长度数组的List实现，支持随机访问，运行null，非线程安全
 - `private static final int DEFAULT_CAPACITY = 10;` 默认容量10
 - `private static final Object[] EMPTY_ELEMENTDATA = {};`  是一个共享的 0 长度数组，用来避免为真正“容量为 0”的 ArrayList 分配多余对象
+- ` private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};` 是ArrayList为了延迟分配默认容量（10）而设计的语义空数组，用来区分 new ArrayList<>() 和 new ArrayList<>(0) 的行为
+- `transient Object[] elementData;` 是ArrayList底层存储数组所有元素都存在这里
+  - transient: 不会被java默认的序列化机制序列化
+- `public ArrayList` 构造方法，如果传了参那就会new Object[params] 如果传的为空那就直接等于 EMPTY_ELEMENTDATA。不传参直接等于 DEFAULTCAPACITY_EMPTY_ELEMENTDATA
+- `public void trimToSize()` 是ArrayList提供的显示内存收缩手段，通过重建底层数组，将capacity压缩到size，并在size为0的时候复用EMPTY_ELEMENTDATA
+- ` public void ensureCapacity(int minCapacity)` 是ArrayList的显示容量控制方法，通过判断当前数组是否足够，是否默认数组，实现了高性能的动态扩容
