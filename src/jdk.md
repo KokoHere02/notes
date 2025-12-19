@@ -77,3 +77,31 @@
 - `public ArrayList` 构造方法，如果传了参那就会new Object[params] 如果传的为空那就直接等于 EMPTY_ELEMENTDATA。不传参直接等于 DEFAULTCAPACITY_EMPTY_ELEMENTDATA
 - `public void trimToSize()` 是ArrayList提供的显示内存收缩手段，通过重建底层数组，将capacity压缩到size，并在size为0的时候复用EMPTY_ELEMENTDATA
 - ` public void ensureCapacity(int minCapacity)` 是ArrayList的显示容量控制方法，通过判断当前数组是否足够，是否默认数组，实现了高性能的动态扩容
+- `private Object[] grow(int minCapacity)` 扩容 会判断老的容量是否大于0或者不等于默认数组就会进行扩容否则就创建默认指定大小的数组 oldCapacity >> 1 扩容容量当前的一半 1.5倍
+- `public boolean equals(Object o)` 判断2个List是否相等，支持各种List，并且检查并判断modCount有没有并发的被修改，如果被修改了就会抛出异常 是fail-fast设计的一部分
+- `int hashCodeRange(int from, int to)` 计算List内from 到 to 范围内的hash 
+- `public ListIterator<E> listIterator(int index)` 从指定的索引获取到迭代器对象
+###### private class Itr implements Iterator<E>
+- 是Iterator的内部优化实现，用于快速、fail-fast便利ArrayList
+- `int cursor; ` 下一个next()返回的索引
+- `int lastRet = -1; ` 上一个返回的索引
+- `int expectedModCount;` 创建迭代器时的modCount，用于fail-fast
+###### private class ListItr extends Itr implements ListIterator<E>
+- 只能在ArrayList内部使用，支持双向遍历，索引访问元素插入，元素替换
+- `public boolean hasPrevious()` 判断是否还有前一个元素返回
+- `public int nextIndex()` 下一个索引
+- `public int previousIndex()` 上一个索引
+- `public E previous()` 获取下一个元素，更新索引下标
+###### private static class SubList<E> extends AbstractList<E> implements RandomAccess
+- ArrayList的内部类 用于实现subList的子列表，实现了大部分List的方法，减少内存开销，支持fail-fast
+- `public Spliterator<E> spliterator()` 是为stream API 和并行遍历提供支持
+###### final class ArrayListSpliterator implements Spliterator<E>
+- 是ArrAyList内部高效Spliterator实现支持顺序遍历、并行拆分、fail-fast
+- `private int index;` 当前索引
+- `private int fence;` 结束索引
+- `private int expectedModCount;` fail-fast版本检测
+- ` private int getFence()` 如果fence < 0就初始化fence = size 并返回fence
+-  `public ArrayListSpliterator trySplit()` 尝试分开 获取结束索引、开始索引、中间索引，如果开始索引大于中间索引直接返回空否则就分开
+-  `public boolean tryAdvance(Consumer<? super E> action)` 尝试操作如果action=null 就直接结束
+- `public void forEachRemaining(Consumer<? super E> action)` 对于每个剩余的元素进行操作
+- `public long estimateSize()` 估计操作的元素 结束索引 - 开始索引
