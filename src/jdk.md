@@ -105,3 +105,25 @@
 -  `public boolean tryAdvance(Consumer<? super E> action)` 尝试操作如果action=null 就直接结束
 - `public void forEachRemaining(Consumer<? super E> action)` 对于每个剩余的元素进行操作
 - `public long estimateSize()` 估计操作的元素 结束索引 - 开始索引
+
+#####  public class LinkedList<E> extends AbstractSequentialList<E> implements List<E>, Deque<E>, Cloneable, java.io.Serializable
+- 底层是双向链表，列表 + 队列 + 双端队列 + 栈 查找满 插入删除快
+- `transient Node<E> first;` 头节点
+- `transient Node<E> last;` 尾节点
+- `private void linkFirst(E e)` 新增一个头节点
+- `void linkLast(E e)` 新增一个尾节点
+- `void linkBefore(E e, Node<E> succ)` 在succ前新增一个节点
+- `E unlink(Node<E> x)` 删除非空节点x
+###### private class ListItr implements ListIterator<E>
+- 是LinkedList的迭代器，支持双向迭代
+- `private Node<E> lastReturned;` 保存最近一次next()或previous() 的节点
+- `private Node<E> next;` 下一个节点
+- `private int nextIndex;` 下一个索引
+- `private int expectedModCount = modCount;` 记录操作步骤次数 用于支持fail-fast
+###### static final class LLSpliterator<E> implements Spliterator<E>
+- `static final int BATCH_UNIT = 1 << 10;` 拆分数据每次最小拆分1024个
+- `static final int MAX_BATCH = 1 << 25;` 拆分数据最大支持3300万
+- `final LinkedList<E> list;` 迭代器关联的LinkedList
+- `Node<E> current;` 当前遍历的节点
+- `int est; ` 剩余元素的预估值
+- `int expectedModCount;` fail-fast 机制
