@@ -127,3 +127,9 @@
 - `Node<E> current;` 当前遍历的节点
 - `int est; ` 剩余元素的预估值
 - `int expectedModCount;` fail-fast 机制
+
+######  static class ReverseOrderLinkedListView<E> extends LinkedList<E> implements java.io.Externalizable 
+- jdk21新增的类，用于reversed方法创建一个逆序的LinkedList
+- `final LinkedList<E> list;` 元数据
+- `final List<E> rlist;` 逆序的list
+- `final Deque<E> rdeque;` 逆序的queue
